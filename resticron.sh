@@ -22,6 +22,9 @@ if [ ! -f "resticron_config.sh" ]; then
   echo "" >> resticron_config.sh
   echo "#restic does not automatically report progress to log, set value for reporting frequency, 1 / length of time in seconds, so 1 is every second, 0.016666 is once per minute." >> resticron_config.sh
   echo "restic_progress_reporting=0.016666   # default: 0.016666" >> resticron_config.sh
+  echo "" >> resticron_config.sh
+  echo "#indicate if you would like the log cleared at the beginning of each backup" >> resticron_config.sh
+  echo "restic_log_clear=\"\"  # can be \"yes\" or \"no\"" >> resticron_config.sh
   echo "resticron_config.sh was not found. A template file was created, please insert the values for all variables and run again." | tee >(mail -s "resticron Setup Necessary" root)
   exit 0
 fi
@@ -42,6 +45,9 @@ if [ "$num_instances" -gt 1 ]; then
     echo "An instance of resticron was already running when this script was started. If this is unexpected, check that an existing instance has not hung while processing." | tee >(mail -s "resticron ERROR" $email)
     exit 1
 fi
+
+#clear log file if restic_log_clear is set to "yes"
+if [ $restic_log_clear == "yes" ]; then echo "" > "$log_file"; fi
 
 # send stdout+stderr to log file
 exec > >(tee -a "$log_file") 2>&1
